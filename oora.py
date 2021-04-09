@@ -12,22 +12,21 @@ class Oracle:
         self._argparse()
 # }}}
 
-    def query(self,q):# {{{
+    def query(self,query):# {{{
         data=''
-        print(11)
         if query.startswith('select') or query.startswith('SELECT'):
-            for row in cursor.execute(query):
+            for row in self.cur.execute(query):
                 data+=";".join([ str(i) for i in row ])+"\n"
-            print(";".join([ str(i[0]) for i in cursor.description ]))
+            print(";".join([ str(i[0]) for i in self.cur.description ]))
             print(data)
         else:
-            cursor.execute(query)
+            self.cur.execute(query)
             self.con.commit()
 # }}}
     def _argparse(self):# {{{
-        parser = argparse.ArgumentParser(description="Oracle cmdline client ")
-        parser.add_argument('-q' , help='query'     , required=True  , action='store_true')
-        parser.add_argument('-d' , help='delimiter' , required=False , action='store_true')
+        parser = argparse.ArgumentParser(description="Oracle cmdline client")
+        parser.add_argument('-q' , help='query'     , required=False)
+        parser.add_argument('-d' , help='delimiter' , required=False)
         args = parser.parse_args()
 
         if args.d:
