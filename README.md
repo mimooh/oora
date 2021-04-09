@@ -1,18 +1,23 @@
-oora.py is an alternative to sqlplus (wraping, delimiter stuff)  
-oora.py is a shell wrapper around cx_Oracle python library
+oora.py is an oracle database cmdline client  
+it is an alternative to sqlplus (wraping, delimiter stuff)  
+it is a shell wrapper around cx_Oracle python library  
+it is meant for comfort, less for speed
 
-### INSTALL
+### CLIENT INSTALL
 
-pip3 install cx_oracle  
+git clone https://github.com/mimooh/oora.git
+pip3 install cx_oracle prettytable  
 
 in ~/.bashrc:  
-export ORACLE_USER=user  
-export ORACLE_PASS=pass  
+export OORA_USER=user  
+export OORA_PASS=pass  
+export OORA_HOST=localhost
 
 ### FOR COMFORT
 
-sudo ln -sf oora.py /usr/local/bin/oora  
+sudo ln -sf /path/to/oora.py /usr/local/bin/oora  
 sudo chmod 775 /usr/local/bin/oora  
 
 ### USAGE
-oora -q "select * from xyz"  
+
+oora -c "select * from xyz"  
