@@ -76,7 +76,7 @@ class Oora:
     def examples(self):# {{{
         print('''
 oora -c "create table aaa(city varchar(100), year integer)" 
-oora -c "select * from aaa where rownum<=40" 
+oora -c "select * from aaa where rownum<=5" 
 oora -c "select rownum,a.* from aaa a" 
 oora -c "delete from aaa where regexp_like (city,'War')" 
 oora -c "insert into aaa(city,year) values('Warsaw', 2021)" 
