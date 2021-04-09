@@ -5,7 +5,7 @@ it is meant for comfort, less for speed
 
 ### CLIENT INSTALL
 
-git clone https://github.com/mimooh/oora.git
+git clone https://github.com/mimooh/oora.git  
 pip3 install cx_oracle prettytable  
 
 in ~/.bashrc:  
