@@ -6,7 +6,7 @@ import os
 import re
 from prettytable import PrettyTable
 
-class Oracle:
+class Oora:
     def __init__(self):# {{{
         self.con=cx_Oracle.connect(os.environ['OORA_USER'], os.environ['OORA_PASS'], os.environ['OORA_HOST'])
         self.cur=self.con.cursor()
@@ -62,5 +62,5 @@ class Oracle:
 
 # }}}
 
-o=Oracle()
+Oora()
 
