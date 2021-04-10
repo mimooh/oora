@@ -6,6 +6,7 @@ import os
 import re
 import csv
 from prettytable import PrettyTable
+from datetime import datetime
 
 class Oora:
     def __init__(self):# {{{
@@ -13,6 +14,7 @@ class Oora:
         self.cur=self.con.cursor()
         self.delimiter=';'
         self.aligned=True
+        self.csv_datefmt='%Y-%m-%d'
         self.argparse()
 # }}}
     def query(self,query):# {{{
@@ -59,43 +61,62 @@ class Oora:
             for row in reader:
                 record=[]
                 for val in row:
-                    record.append(self.detect_type(val))
+                    record.append(self.detect_type(val.strip()))
                 collect.append(record)
         self.cur.executemany(query, collect)
         self.con.commit()
         exit()
 # }}}
     def detect_type(self,value):# {{{
-        for test in [ int, float ]:
+        for typ,test in [ ('date', datetime.strptime),  ('int', int), ('float', float) ]:
             try:
-                return test(value)
+                if typ == 'date':
+                    return test(value, self.csv_datefmt)
+                else:
+                    return test(value)
             except ValueError:
                 continue
         return value
 # }}}
     def examples(self):# {{{
         print('''
-oora -c "create table aaa(city varchar(100), year integer)" 
-oora -c "select * from aaa where rownum<=5" 
+oora -z
+oora -c "drop table aaa" 
+oora -c "create table aaa(city varchar(100), year integer, mass number, when date)" 
+oora -c "select * from aaa where rownum<=20 order by city" 
 oora -c "select rownum,a.* from aaa a" 
 oora -c "delete from aaa where regexp_like (city,'War')" 
 oora -c "insert into aaa(city,year) values('Warsaw', 2021)" 
-oora -c "SELECT TABLE_NAME FROM all_tables where TABLE_NAME like 'DZ_\%' order by TABLE_NAME"
+oora -c "SELECT TABLE_NAME FROM all_tables where regexp_like(TABLE_NAME, '^DZ_') order by TABLE_NAME"
 oora -c "SELECT TABLE_NAME FROM all_tables order by TABLE_NAME"
-oora -C /tmp/data.csv -c "insert into aaa(city,year) values(:1, :2)"
+
+==========================================
+
+CSV:
+oora -C /tmp/data.csv -c "insert into aaa(city,year,mass,when) values(:1, :2, :3, :4)"
+oora -C /tmp/data.csv -c "insert into aaa(city,year,mass,when) values(:1, :2, :3, :4)" -d ';'
+oora -C /tmp/data.csv -c "insert into aaa(city,year,mass,when) values(:1, :2, :3, :4)" -D "%Y-%m-%d %H:%M:%S" 
+
+Default CSV delimiter and date format. First row must be data, not header.
+Warsaw    ; 1975 ; 1.0001 ; 2021-10-30
+Berlin    ; 2021 ; 3.14   ; 2021-11-30
+Amsterdam ; 2055 ; 4      ; 2021-12-30
 ''')
 # }}}
     def argparse(self):# {{{
         parser = argparse.ArgumentParser(description="Oracle cmdline client")
-        parser.add_argument('-c' , help='query'               , required=False)
-        parser.add_argument('-d' , help='delimiter'           , required=False)
-        parser.add_argument('-u' , help='unaligned output'    , required=False  , action='store_true')
-        parser.add_argument('-C' , help='csv import (see -z)' , required=False)
-        parser.add_argument('-z' , help='examples'            , required=False  , action='store_true')
+        parser.add_argument('-c' , help='query'                , required=False)
+        parser.add_argument('-d' , help='delimiter'            , required=False)
+        parser.add_argument('-u' , help='unaligned output'     , required=False  , action='store_true')
+        parser.add_argument('-C' , help='csv import  (see -z)' , required=False)
+        parser.add_argument('-D' , help='csv datefmt (see -z)' , required=False)
+        parser.add_argument('-z' , help='examples'             , required=False  , action='store_true')
         args = parser.parse_args()
 
         if args.d:
             self.delimiter=args.d
+        if args.D:
+            self.csv_datefmt=args.D
         if args.C:
             self.csv_import(args.C, args.c)
         if args.u:
