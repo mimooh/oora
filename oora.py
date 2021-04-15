@@ -84,11 +84,12 @@ oora -z
 oora -c "drop table aaa" 
 oora -c "create table aaa(city varchar(100), year integer, mass number, when date)" 
 oora -c "select * from aaa where rownum<=20 order by city" 
-oora -c "select rownum,a.* from aaa a" 
 oora -c "delete from aaa where regexp_like (city,'War')" 
 oora -c "insert into aaa(city,year) values('Warsaw', 2021)" 
 oora -c "SELECT TABLE_NAME FROM all_tables where regexp_like(TABLE_NAME, '^DZ_') order by TABLE_NAME"
 oora -c "SELECT TABLE_NAME FROM all_tables order by TABLE_NAME"
+oora -c "SELECT COLUMN_NAME from ALL_TAB_COLUMNS where lower(TABLE_NAME) = lower('aaa')"
+
 
 ==========================================
 
