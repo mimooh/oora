@@ -49,6 +49,16 @@ class Oora:
         print(header)
         print(data)
 # }}}
+    def csv_values(self,query):# {{{
+        '''
+        Replace             aaa(city,year,mass,when)
+        with    insert into aaa(city,year,mass,when) values(:1, :2, :3, :4)
+        '''
+
+        z=[ ":"+str(i[0]+1) for i in enumerate(query.split(',')) ]
+        q="insert into {} values({})".format(query, ", ".join(z))
+        return q
+# }}}
     def csv_import(self,f,query):# {{{
         ''' 
         We are guessing datatypes for arrays
@@ -63,6 +73,7 @@ class Oora:
                 for val in row:
                     record.append(self.detect_type(val.strip()))
                 collect.append(record)
+        query=self.csv_values(query)
         self.cur.executemany(query, collect)
         self.con.commit()
         exit()
@@ -93,9 +104,9 @@ oora -c "SELECT TABLE_NAME FROM all_tables order by TABLE_NAME"
 ==========================================
 
 CSV:
-oora -C /tmp/data.csv -c "insert into aaa(city,year,mass,when) values(:1, :2, :3, :4)"
-oora -C /tmp/data.csv -c "insert into aaa(city,year,mass,when) values(:1, :2, :3, :4)" -d ';'
-oora -C /tmp/data.csv -c "insert into aaa(city,year,mass,when) values(:1, :2, :3, :4)" -D "%Y-%m-%d %H:%M:%S" 
+oora -C /tmp/data.csv -c "aaa(city,year,mass,when)"
+oora -C /tmp/data.csv -c "aaa(city,year,mass,when)" -d ';'
+oora -C /tmp/data.csv -c "aaa(city,year,mass,when)" -D "%Y-%m-%d %H:%M:%S" 
 
 Default CSV delimiter and date format. First row must be data, not header.
 Warsaw    ; 1975 ; 1.0001 ; 2021-10-30
