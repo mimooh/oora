@@ -88,8 +88,6 @@ oora -c "delete from aaa where regexp_like (city,'War')"
 oora -c "insert into aaa(city,year) values('Warsaw', 2021)" 
 oora -c "SELECT TABLE_NAME FROM all_tables where regexp_like(TABLE_NAME, '^DZ_') order by TABLE_NAME"
 oora -c "SELECT TABLE_NAME FROM all_tables order by TABLE_NAME"
-oora -c "SELECT COLUMN_NAME from ALL_TAB_COLUMNS where lower(TABLE_NAME) = lower('aaa')"
-
 
 ==========================================
 
@@ -108,6 +106,7 @@ Amsterdam ; 2055 ; 4      ; 2021-12-30
         parser = argparse.ArgumentParser(description="Oracle cmdline client")
         parser.add_argument('-c' , help='query'                , required=False)
         parser.add_argument('-d' , help='delimiter'            , required=False)
+        parser.add_argument('-t' , help='describe table'       , required=False)
         parser.add_argument('-u' , help='unaligned output'     , required=False  , action='store_true')
         parser.add_argument('-C' , help='csv import  (see -z)' , required=False)
         parser.add_argument('-D' , help='csv datefmt (see -z)' , required=False)
@@ -118,6 +117,8 @@ Amsterdam ; 2055 ; 4      ; 2021-12-30
             self.delimiter=args.d
         if args.D:
             self.csv_datefmt=args.D
+        if args.t:
+            self.query("SELECT COLUMN_NAME,DATA_TYPE,DATA_LENGTH from ALL_TAB_COLUMNS where lower(TABLE_NAME) = lower('{}')".format(args.t))
         if args.C:
             self.csv_import(args.C, args.c)
         if args.u:
