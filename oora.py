@@ -83,6 +83,7 @@ class Oora:
 oora -z
 oora -c "drop table aaa" 
 oora -c "create table aaa(city varchar(100), year integer, mass number, when date)" 
+oora -t "aaa" 
 oora -c "select * from aaa where rownum<=20 order by city" 
 oora -c "delete from aaa where regexp_like (city,'War')" 
 oora -c "insert into aaa(city,year) values('Warsaw', 2021)" 
