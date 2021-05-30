@@ -123,6 +123,7 @@ Amsterdam ; 2055 ; 4      ; 2021-12-30
         parser.add_argument('-u' , help='unaligned output'     , required=False  , action='store_true')
         parser.add_argument('-C' , help='csv import  (see -z)' , required=False)
         parser.add_argument('-D' , help='csv datefmt (see -z)' , required=False)
+        parser.add_argument('-a' , help='find constraint'      , required=False)
         parser.add_argument('-z' , help='examples'             , required=False  , action='store_true')
         args = parser.parse_args()
 
@@ -132,6 +133,8 @@ Amsterdam ; 2055 ; 4      ; 2021-12-30
             self.csv_datefmt=args.D
         if args.l:
             self.query("SELECT TABLE_NAME FROM all_tables order by TABLE_NAME")
+        if args.a:
+            self.query("select TABLE_NAME,COLUMN_NAME from user_cons_columns where lower(constraint_name) = lower('{}')".format(args.a))
         if args.t:
             self.query("SELECT COLUMN_NAME,DATA_TYPE,DATA_LENGTH from ALL_TAB_COLUMNS where lower(TABLE_NAME) = lower('{}')".format(args.t))
         if args.C:
