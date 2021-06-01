@@ -4,6 +4,7 @@ import argparse
 import sys
 import os
 import re
+import json
 import csv
 from prettytable import PrettyTable
 from datetime import datetime
@@ -16,6 +17,11 @@ class Oora:
         self.aligned=True
         self.csv_datefmt='%Y-%m-%d'
         self.argparse()
+# }}}
+    def callproc(self,json_input):# {{{
+        z=json.loads(json_input)
+        self.cur.callproc(z[0], z[1])
+        self.con.commit()
 # }}}
     def query(self,query):# {{{
         if re.match("^\s*select", query, re.IGNORECASE):
@@ -100,6 +106,7 @@ oora -c "delete from aaa where regexp_like (city,'War')"
 oora -c "insert into aaa(city,year) values('Warsaw', 2021)" 
 oora -c "SELECT TABLE_NAME FROM all_tables where regexp_like(TABLE_NAME, '^DZ_') order by TABLE_NAME"
 oora -c "SELECT TABLE_NAME FROM all_tables order by TABLE_NAME"
+oora -p '[ "oracle_procedure.name", [ "arg_from", "arg_to" ] ]' a JSON string
 
 ==========================================
 
@@ -124,6 +131,7 @@ Amsterdam ; 2055 ; 4      ; 2021-12-30
         parser.add_argument('-C' , help='csv import  (see -z)' , required=False)
         parser.add_argument('-D' , help='csv datefmt (see -z)' , required=False)
         parser.add_argument('-a' , help='find constraint'      , required=False)
+        parser.add_argument('-p' , help='run procedure'        , required=False)
         parser.add_argument('-z' , help='examples'             , required=False  , action='store_true')
         args = parser.parse_args()
 
@@ -143,6 +151,8 @@ Amsterdam ; 2055 ; 4      ; 2021-12-30
             self.aligned=False
         if args.c:
             self.query(args.c)
+        if args.p:
+            self.callproc(args.p)
         if args.z:
             self.examples()
 
