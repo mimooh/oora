@@ -95,12 +95,12 @@ oora -z
 oora -c "drop table aaa" 
 oora -c "create table aaa(city varchar(100), year integer, mass number, when date)" 
 oora -t "aaa" 
-oora -c "select * from aaa where rownum<=20 order by city" 
+oora -c "select * from aaa where rownum<=2 order by city" 
 oora -c "delete from aaa where regexp_like (city,'War')" 
 oora -c "insert into aaa(city,year) values('Warsaw', 2021)" 
-oora -c "SELECT TABLE_NAME FROM all_tables where regexp_like(TABLE_NAME, '^DZ_') order by TABLE_NAME"
-oora -c "SELECT TABLE_NAME FROM all_tables order by TABLE_NAME"
+oora -c "select object_name,procedure_name from user_procedures where regexp_like(object_name, 'ZMIANA')"
 oora -c "begin PKG_ZMIANA_KLUCZY.KLUCZ_PRZEDMIOTU('BWbe-ND-C-BWUE','zupa'); end;"
+oora -a "PRZCKL_PRZ_FK"
 
 ==========================================
 
@@ -137,7 +137,7 @@ Amsterdam ; 2055 ; 4      ; 2021-12-30
         if args.a:
             self.query("select TABLE_NAME,COLUMN_NAME from user_cons_columns where lower(constraint_name) = lower('{}')".format(args.a))
         if args.t:
-            self.query("SELECT COLUMN_NAME,DATA_TYPE,DATA_LENGTH from ALL_TAB_COLUMNS where lower(TABLE_NAME) = lower('{}')".format(args.t))
+            self.query("SELECT COLUMN_NAME,NULLABLE,DATA_TYPE,DATA_LENGTH,DATA_DEFAULT from ALL_TAB_COLUMNS where lower(TABLE_NAME) = lower('{}') order by NULLABLE,COLUMN_NAME ".format(args.t))
         if args.C:
             self.csv_import(args.C, args.c)
         if args.u:
