@@ -5,6 +5,7 @@ import sys
 import os
 import re
 import csv
+import json
 from prettytable import PrettyTable
 from datetime import datetime
 
@@ -14,12 +15,15 @@ class Oora:
         self.cur=self.con.cursor()
         self.delimiter=';'
         self.aligned=True
+        self.result_as_json=False
         self.csv_datefmt='%Y-%m-%d'
         self.argparse()
 # }}}
     def query(self,query):# {{{
         if re.match("^\s*select", query, re.IGNORECASE):
-            if self.aligned==True:
+            if self.result_as_json==True:
+                self.as_json(query)
+            elif self.aligned==True:
                 self.aligned_select_query(query)
             else:
                 self.nonaligned_select_query(query)
@@ -48,6 +52,17 @@ class Oora:
         header=self.delimiter.join([ str(i[0]) for i in self.cur.description ])
         print(header)
         print(data)
+# }}}
+    def as_json(self,query):# {{{
+        rows=[]
+        for row in self.cur.execute(query):
+            rows.append(row)
+        header=[ str(i[0]) for i in self.cur.description ]
+
+        out=[]
+        for i in rows:
+            out.append(dict(zip(header,i)))
+        print(json.dumps(out, sort_keys=True, default=str))
 # }}}
     def csv_values(self,query):# {{{
         '''
@@ -122,6 +137,7 @@ Amsterdam ; 2055 ; 4      ; 2021-12-30
         parser.add_argument('-l' , help='list tables'          , required=False  , action='store_true')
         parser.add_argument('-t' , help='describe table'       , required=False)
         parser.add_argument('-u' , help='unaligned output'     , required=False  , action='store_true')
+        parser.add_argument('-j' , help='as_json output'       , required=False  , action='store_true')
         parser.add_argument('-C' , help='csv import  (see -z)' , required=False)
         parser.add_argument('-D' , help='csv datefmt (see -z)' , required=False)
         parser.add_argument('-a' , help='find constraint'      , required=False)
@@ -142,6 +158,8 @@ Amsterdam ; 2055 ; 4      ; 2021-12-30
             self.csv_import(args.C, args.c)
         if args.u:
             self.aligned=False
+        if args.j:
+            self.result_as_json=1
         if args.c:
             self.query(args.c)
         if args.z:
