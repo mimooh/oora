@@ -14,7 +14,7 @@ class Oora:
         self.con=cx_Oracle.connect(os.environ['OORA_USER'], os.environ['OORA_PASS'], os.environ['OORA_HOST'])
         self.cur=self.con.cursor()
         self.delimiter=';'
-        self.aligned=True
+        self.aligned=False
         self.result_as_json=False
         self.csv_datefmt='%Y-%m-%d'
         self.argparse()
@@ -32,6 +32,8 @@ class Oora:
             self.con.commit()
 # }}}
     def aligned_select_query(self,query):# {{{
+        ''' Slow for large data sets '''
+
         data=[]
         for row in self.cur.execute(query):
             data.append([ "; "+str(i) for i in row ])
@@ -115,7 +117,7 @@ oora -c "delete from aaa where regexp_like (city,'War')"
 oora -c "insert into aaa(city,year) values('Warsaw', 2021)" 
 oora -c "select object_name,procedure_name from user_procedures where regexp_like(object_name, 'ZMIANA')"
 oora -c "begin PKG_ZMIANA_KLUCZY.KLUCZ_PRZEDMIOTU('BWbe-ND-C-BWUE','zupa'); end;"
-oora -a "PRZCKL_PRZ_FK"
+oora -A "PRZCKL_PRZ_FK"
 
 ==========================================
 
@@ -136,11 +138,11 @@ Amsterdam ; 2055 ; 4      ; 2021-12-30
         parser.add_argument('-d' , help='delimiter'            , required=False)
         parser.add_argument('-l' , help='list tables'          , required=False  , action='store_true')
         parser.add_argument('-t' , help='describe table'       , required=False)
-        parser.add_argument('-u' , help='unaligned output'     , required=False  , action='store_true')
+        parser.add_argument('-a' , help='aligned output'       , required=False  , action='store_true')
         parser.add_argument('-j' , help='as_json output'       , required=False  , action='store_true')
         parser.add_argument('-C' , help='csv import  (see -z)' , required=False)
         parser.add_argument('-D' , help='csv datefmt (see -z)' , required=False)
-        parser.add_argument('-a' , help='find constraint'      , required=False)
+        parser.add_argument('-A' , help='find constraint'      , required=False)
         parser.add_argument('-z' , help='examples'             , required=False  , action='store_true')
         args = parser.parse_args()
 
@@ -150,14 +152,14 @@ Amsterdam ; 2055 ; 4      ; 2021-12-30
             self.csv_datefmt=args.D
         if args.l:
             self.query("SELECT TABLE_NAME FROM all_tables order by TABLE_NAME")
-        if args.a:
+        if args.A:
             self.query("select TABLE_NAME,COLUMN_NAME from user_cons_columns where lower(constraint_name) = lower('{}')".format(args.a))
         if args.t:
             self.query("SELECT COLUMN_NAME,NULLABLE,DATA_TYPE,DATA_LENGTH,DATA_DEFAULT from ALL_TAB_COLUMNS where lower(TABLE_NAME) = lower('{}') order by NULLABLE,COLUMN_NAME ".format(args.t))
         if args.C:
             self.csv_import(args.C, args.c)
-        if args.u:
-            self.aligned=False
+        if args.a:
+            self.aligned=True
         if args.j:
             self.result_as_json=1
         if args.c:
