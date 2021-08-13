@@ -48,12 +48,12 @@ class Oora:
         print(x)
 # }}}
     def nonaligned_select_query(self,query):# {{{
-        data=''
+        data=[]
         for row in self.cur.execute(query):
-            data+=self.delimiter.join([ str(i) for i in row ])+"\n"
+            data.append(self.delimiter.join([ str(i) for i in row ]))
         header=self.delimiter.join([ str(i[0]) for i in self.cur.description ])
         print(header)
-        print(data)
+        print("\n".join(data))
 # }}}
     def as_json(self,query):# {{{
         rows=[]
