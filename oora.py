@@ -113,7 +113,7 @@ oora -c "drop table aaa"
 oora -c "create table aaa(city varchar(100), year integer, mass number, when date)" 
 oora -t "aaa" 
 oora -c "select * from aaa where rownum<=2 order by city" 
-oora -c "delete from aaa where regexp_like (city,'War')" 
+oora -c "delete from aaa where regexp_like (city,'warsa','i')" 
 oora -c "insert into aaa(city,year) values('Warsaw', 2021)" 
 oora -c "select object_name,procedure_name from user_procedures where regexp_like(object_name, 'ZMIANA')"
 oora -c "begin PKG_ZMIANA_KLUCZY.KLUCZ_PRZEDMIOTU('BWbe-ND-C-BWUE','zupa'); end;"
@@ -121,15 +121,15 @@ oora -A "PRZCKL_PRZ_FK"
 
 ==========================================
 
-CSV:
+Inserting from /tmp/data.csv: target db table must exist, no header in csv, ';' is delimiter, no newlines allowed:
+Warsaw    ; 1975 ; 1.0001 ; 2021-10-30
+Berlin    ; 2021 ; 3.14   ; 2021-11-30
+Amsterdam ; 2055 ; 4      ; 2021-12-30
+
 oora -C /tmp/data.csv -c "aaa(city,year,mass,when)"
 oora -C /tmp/data.csv -c "aaa(city,year,mass,when)" -d ';'
 oora -C /tmp/data.csv -c "aaa(city,year,mass,when)" -D "%Y-%m-%d %H:%M:%S" 
 
-Default CSV delimiter and date format. First row must be data, not header.
-Warsaw    ; 1975 ; 1.0001 ; 2021-10-30
-Berlin    ; 2021 ; 3.14   ; 2021-11-30
-Amsterdam ; 2055 ; 4      ; 2021-12-30
 ''')
 # }}}
     def argparse(self):# {{{
