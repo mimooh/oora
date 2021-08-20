@@ -2,6 +2,7 @@ oora.py is an oracle database cmdline client
 it is an alternative to sqlplus (wraping, delimiter stuff)  
 it is a wrapper around cx_Oracle python library  
 it is meant for comfort, less for speed
+it is tested only under Ubuntu Linux where Oracle client and server are the same host
 
 ### CLIENT INSTALL
 

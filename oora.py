@@ -8,6 +8,7 @@ import csv
 import json
 from prettytable import PrettyTable
 from datetime import datetime
+from subprocess import Popen, PIPE
 
 class Oora:
     def __init__(self):# {{{
@@ -118,8 +119,9 @@ oora -c "insert into aaa(city,year) values('Warsaw', 2021)"
 oora -c "select object_name,procedure_name from user_procedures where regexp_like(object_name, 'ZMIANA')"
 oora -c "begin PKG_ZMIANA_KLUCZY.KLUCZ_PRZEDMIOTU('BWbe-ND-C-BWUE','zupa'); end;"
 oora -A "PRZCKL_PRZ_FK"
+oora -f "script.sql"
 
-==========================================
+================ CSV ================
 
 Inserting from /tmp/data.csv: target db table must exist, no header in csv, ';' is delimiter, no newlines allowed:
 Warsaw    ; 1975 ; 1.0001 ; 2021-10-30
@@ -134,24 +136,29 @@ oora -C /tmp/data.csv -c "aaa(city,year,mass,when)" -D "%Y-%m-%d %H:%M:%S"
 # }}}
     def argparse(self):# {{{
         parser = argparse.ArgumentParser(description="Oracle cmdline client")
-        parser.add_argument('-c' , help='query'                , required=False)
-        parser.add_argument('-d' , help='delimiter'            , required=False)
-        parser.add_argument('-l' , help='list tables'          , required=False  , action='store_true')
-        parser.add_argument('-t' , help='describe table'       , required=False)
-        parser.add_argument('-a' , help='aligned output'       , required=False  , action='store_true')
-        parser.add_argument('-j' , help='as_json output'       , required=False  , action='store_true')
-        parser.add_argument('-C' , help='csv import  (see -z)' , required=False)
-        parser.add_argument('-D' , help='csv datefmt (see -z)' , required=False)
-        parser.add_argument('-A' , help='find constraint'      , required=False)
-        parser.add_argument('-z' , help='examples'             , required=False  , action='store_true')
+        parser.add_argument('-d' , help='delimiter'               , required=False)
+        parser.add_argument('-l' , help='list tables'             , required=False  , action='store_true')
+        parser.add_argument('-f' , help='run a script in sqlplus' , required=False)
+        parser.add_argument('-t' , help='describe table'          , required=False)
+        parser.add_argument('-a' , help='aligned output'          , required=False  , action='store_true')
+        parser.add_argument('-j' , help='as_json output'          , required=False  , action='store_true')
+        parser.add_argument('-D' , help='csv datefmt (see -z)'    , required=False)
+        parser.add_argument('-c' , help='query'                   , required=False)
+        parser.add_argument('-C' , help='csv import  (see -z)'    , required=False)
+        parser.add_argument('-A' , help='find constraint'         , required=False)
+        parser.add_argument('-z' , help='examples'                , required=False  , action='store_true')
         args = parser.parse_args()
 
+        if args.a:
+            self.aligned=True
         if args.d:
             self.delimiter=args.d
         if args.D:
             self.csv_datefmt=args.D
         if args.l:
             self.query("SELECT TABLE_NAME FROM all_tables order by TABLE_NAME")
+        if args.f:
+            self.run_sql_script(args.f)
         if args.A:
             self.aligned=True
             self.query("select TABLE_NAME,COLUMN_NAME from user_cons_columns where lower(constraint_name) = lower('{}')".format(args.A))
@@ -160,8 +167,6 @@ oora -C /tmp/data.csv -c "aaa(city,year,mass,when)" -D "%Y-%m-%d %H:%M:%S"
             self.query("SELECT COLUMN_NAME,NULLABLE,DATA_TYPE,DATA_LENGTH,DATA_DEFAULT from ALL_TAB_COLUMNS where lower(TABLE_NAME) = lower('{}') order by NULLABLE,COLUMN_NAME ".format(args.t))
         if args.C:
             self.csv_import(args.C, args.c)
-        if args.a:
-            self.aligned=True
         if args.j:
             self.result_as_json=1
         if args.c:
@@ -170,6 +175,11 @@ oora -C /tmp/data.csv -c "aaa(city,year,mass,when)" -D "%Y-%m-%d %H:%M:%S"
             self.examples()
 
 # }}}
+    def run_sql_script(self, filename):# {{{
+        sqlplus = Popen(['sqlplus','-S', "{}/{}".format(os.environ['OORA_USER'], os.environ['OORA_PASS'])], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+        sqlplus.stdin.write('@{}'.format(filename).encode())
+        for i in sqlplus.communicate():
+            print(i.decode())
+# }}}
 
 Oora()
-
