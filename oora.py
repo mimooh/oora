@@ -77,35 +77,48 @@ class Oora:
         q="insert into {} values({})".format(query, ", ".join(z))
         return q
 # }}}
+    def csv_datatypes(self,query):
+        x=query.split("(")
+        table=x[0]
+        self.csv_header=[ i.strip() for i in x[1].upper().replace(')', '').split(',') ]
+        self.types_conf={}
+        query="SELECT COLUMN_NAME,DATA_TYPE from ALL_TAB_COLUMNS where lower(TABLE_NAME) = lower('{}')".format(table)
+        for row in self.cur.execute(query):
+            if row[1] in ['NUMBER']:
+                self.types_conf[row[0]]=float
+            elif row[1] in ['DATE']:
+                self.types_conf[row[0]]=datetime.strptime
+            else:
+                self.types_conf[row[0]]=str
+
     def csv_import(self,f,query):# {{{
         ''' 
-        We are guessing datatypes for arrays
+        Preparing datatypes for the arrays
         executemany("insert into aaa(city,year) values(:1, :2)", array(arrays))
         '''
 
+        self.csv_datatypes(query)
         collect=[]
         with open(f, 'r') as file:
             reader = csv.reader(file, delimiter=self.delimiter)
             for row in reader:
-                record=[]
-                for val in row:
-                    record.append(self.detect_type(val.strip()))
-                collect.append(record)
+                collect.append(self.prepare_csv_record(zip(self.csv_header, [ i.strip() for i in row ])))
         query=self.csv_values(query)
         self.cur.executemany(query, collect)
         self.con.commit()
         exit()
 # }}}
-    def detect_type(self,value):# {{{
-        for typ,test in [ ('date', datetime.strptime),  ('int', int), ('float', float) ]:
+    def prepare_csv_record(self,record):# {{{
+        xrecord=[]
+        for a,val in record:
             try:
-                if typ == 'date':
-                    return test(value, self.csv_datefmt)
+                if self.types_conf[a] == datetime.strptime:
+                    xrecord.append(datetime.strptime(val, self.csv_datefmt))
                 else:
-                    return test(value)
+                    xrecord.append(self.types_conf[a](val))
             except ValueError:
-                continue
-        return value
+                xrecord.append(val)
+        return xrecord
 # }}}
     def examples(self):# {{{
         print('''
