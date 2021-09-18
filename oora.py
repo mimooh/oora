@@ -51,7 +51,7 @@ class Oora:
     def nonaligned_select_query(self,query):# {{{
         data=[]
         for row in self.cur.execute(query):
-            data.append(self.delimiter.join([ str(i) for i in row ]))
+            data.append(self.delimiter.join([ str(i or '') for i in row ]))
         header=self.delimiter.join([ str(i[0]) for i in self.cur.description ])
         print(header)
         print("\n".join(data))
