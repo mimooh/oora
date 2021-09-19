@@ -77,7 +77,7 @@ class Oora:
         q="insert into {} values({})".format(query, ", ".join(z))
         return q
 # }}}
-    def csv_datatypes(self,query):
+    def csv_datatypes(self,query):# {{{
         x=query.split("(")
         table=x[0]
         self.csv_header=[ i.strip() for i in x[1].upper().replace(')', '').split(',') ]
@@ -90,7 +90,7 @@ class Oora:
                 self.types_conf[row[0]]=datetime.strptime
             else:
                 self.types_conf[row[0]]=str
-
+# }}}
     def csv_import(self,f,query):# {{{
         ''' 
         Preparing datatypes for the arrays
