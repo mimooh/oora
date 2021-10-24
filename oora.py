@@ -117,7 +117,7 @@ class Oora:
                 else:
                     xrecord.append(self.types_conf[a](val))
             except ValueError:
-                xrecord.append(val)
+                xrecord.append(None)
         return xrecord
 # }}}
     def examples(self):# {{{
