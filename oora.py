@@ -170,6 +170,7 @@ oora -C /tmp/data.csv -c "aaa(city,year,mass,when)" -D "%Y-%m-%d %H:%M:%S"
             self.csv_datefmt=args.D
         if args.l:
             self.query("SELECT TABLE_NAME FROM all_tables order by TABLE_NAME")
+            self.query("select sys_context('USERENV','SERVER_HOST') as host from dual")
         if args.f:
             self.run_sql_script(args.f)
         if args.A:
