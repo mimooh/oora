@@ -37,7 +37,7 @@ class Oora:
 
         data=[]
         for row in self.cur.execute(query):
-            data.append([ "; "+str(i) for i in row ])
+            data.append([ "; "+str(i or '') for i in row ])
         header=[ "; "+str(i[0]) for i in self.cur.description ]
 
         x = PrettyTable()
