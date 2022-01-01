@@ -38,7 +38,7 @@ class Oora:
         data=[]
         for row in self.cur.execute(query):
             data.append([ "; "+str(i or '') for i in row ])
-        header=[ "; "+str(i[0]) for i in self.cur.description ]
+        header=[ "; "+str(i[0]).lower() for i in self.cur.description ]
 
         x = PrettyTable()
         x.field_names = header
@@ -52,7 +52,7 @@ class Oora:
         data=[]
         for row in self.cur.execute(query):
             data.append(self.delimiter.join([ str(i or '') for i in row ]))
-        header=self.delimiter.join([ str(i[0]) for i in self.cur.description ])
+        header=self.delimiter.join([ str(i[0]).lower() for i in self.cur.description ])
         print(header)
         print("\n".join(data))
 # }}}
@@ -60,7 +60,7 @@ class Oora:
         rows=[]
         for row in self.cur.execute(query):
             rows.append(row)
-        header=[ str(i[0]) for i in self.cur.description ]
+        header=[ str(i[0]).lower() for i in self.cur.description ]
 
         out=[]
         for i in rows:
