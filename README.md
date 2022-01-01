@@ -2,6 +2,8 @@ oora.py is an oracle database cmdline client
 it is a wrapper around cx_Oracle python library  
 it is an sqlplus replacement to produce better tabular results:
 
+	oora -c "select name,value,date from table1"  
+
 	name         ; value ; date                
 	some name    ; 11    ; 2021-12-16 18:26:46 
 	another      ; 121   ; 2021-03-25 20:08:22 
@@ -23,6 +25,3 @@ export OORA_HOST=localhost
 sudo ln -sf /path/to/oora.py /usr/local/bin/oora  
 sudo chmod 775 /usr/local/bin/oora  
 
-### USAGE
-
-oora -c "select * from xyz"  
