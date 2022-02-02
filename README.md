@@ -6,7 +6,7 @@ it is an sqlplus replacement to produce better tabular results:
 
 	name         ; value ; date                
 	some name    ; 11    ; 2021-12-16 18:26:46 
-	another      ; 121   ; 2021-03-25 20:08:22 
+	another      ; 123   ; 2021-03-25 20:08:22 
 	and one more ; 0     ; 2021-03-25 20:08:31 
 
 
