@@ -37,6 +37,8 @@ class Oora:
 
         data=[]
         for row in self.cur.execute(query):
+            if hasattr(self, 'select_first_5') and len(data)==5:
+                break
             data.append([ "; "+str(i or '') for i in row ])
         header=[ "; "+str(i[0]).lower() for i in self.cur.description ]
 
@@ -122,6 +124,8 @@ class Oora:
 # }}}
     def examples(self):# {{{
         print('''
+LIKE is not supported - use REGEXP_LIKE(attr, pattern)
+
 oora -z
 oora -c "drop table aaa" 
 oora -c "create table aaa(city varchar(100), year integer, mass number, when date)" 
@@ -149,17 +153,18 @@ oora -C /tmp/data.csv -c "aaa(city,year,mass,when)" -D "%Y-%m-%d %H:%M:%S"
 # }}}
     def argparse(self):# {{{
         parser = argparse.ArgumentParser(description="Oracle cmdline client")
-        parser.add_argument('-d' , help='delimiter'               , required=False)
-        parser.add_argument('-l' , help='list tables'             , required=False  , action='store_true')
-        parser.add_argument('-f' , help='run a script in sqlplus' , required=False)
-        parser.add_argument('-t' , help='describe table'          , required=False)
-        parser.add_argument('-a' , help='aligned output'          , required=False  , action='store_true')
-        parser.add_argument('-j' , help='as_json output'          , required=False  , action='store_true')
-        parser.add_argument('-D' , help='csv datefmt (see -z)'    , required=False)
-        parser.add_argument('-c' , help='query'                   , required=False)
-        parser.add_argument('-C' , help='csv import  (see -z)'    , required=False)
-        parser.add_argument('-A' , help='find constraint'         , required=False)
-        parser.add_argument('-z' , help='examples'                , required=False  , action='store_true')
+        parser.add_argument('-d' , help='delimiter'                              , required=False)
+        parser.add_argument('-l' , help='list tables'                            , required=False  , action='store_true')
+        parser.add_argument('-f' , help='run a script in sqlplus'                , required=False)
+        parser.add_argument('-t' , help='describe table'                         , required=False)
+        parser.add_argument('-L' , help='select: first 5 results + align output' , required=False  , action='store_true')
+        parser.add_argument('-a' , help='aligned output'                         , required=False  , action='store_true')
+        parser.add_argument('-j' , help='as_json output'                         , required=False  , action='store_true')
+        parser.add_argument('-D' , help='csv datefmt (see -z)'                   , required=False)
+        parser.add_argument('-c' , help='query'                                  , required=False)
+        parser.add_argument('-C' , help='csv import  (see -z)'                   , required=False)
+        parser.add_argument('-A' , help='describe constraint'                    , required=False)
+        parser.add_argument('-z' , help='examples'                               , required=False  , action='store_true')
         args = parser.parse_args()
 
         if args.a:
@@ -183,6 +188,9 @@ oora -C /tmp/data.csv -c "aaa(city,year,mass,when)" -D "%Y-%m-%d %H:%M:%S"
             self.csv_import(args.C, args.c)
         if args.j:
             self.result_as_json=1
+        if args.L:
+            self.select_first_5=1
+            self.aligned=True
         if args.c:
             self.query(args.c)
         if args.z:
