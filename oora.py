@@ -39,7 +39,7 @@ class Oora:
         for row in self.cur.execute(query):
             if hasattr(self, 'select_first_5') and len(data)==5:
                 break
-            row = [ '0' for i in row if i==0 ]
+            row = [ '0' if i==0 else i for i in row  ]
             data.append([ "; "+str(i or '') for i in row ])
         header=[ "; "+str(i[0]).lower() for i in self.cur.description ]
 
@@ -54,7 +54,7 @@ class Oora:
     def nonaligned_select_query(self,query):# {{{
         data=[]
         for row in self.cur.execute(query):
-            row = [ '0' for i in row if i==0 ]
+            row = [ '0' if i==0 else i for i in row  ]
             data.append(self.delimiter.join([ str(i or '') for i in row ]))
         header=self.delimiter.join([ str(i[0]).lower() for i in self.cur.description ])
         print(header)
