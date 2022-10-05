@@ -39,6 +39,7 @@ class Oora:
         for row in self.cur.execute(query):
             if hasattr(self, 'select_first_5') and len(data)==5:
                 break
+            row = [ '0' for i in row if i==0 ]
             data.append([ "; "+str(i or '') for i in row ])
         header=[ "; "+str(i[0]).lower() for i in self.cur.description ]
 
