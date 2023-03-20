@@ -201,6 +201,7 @@ oora -C /tmp/data.csv -c "aaa(city,year,mass,when)" -D "%Y-%m-%d %H:%M:%S"
 # }}}
     def run_sql_script(self, filename):# {{{
         ''' We are running database as user oracle, right? '''
+
         os.system("exit | sudo -i -u oracle sqlplus -S \"{}/{}\" @{}".format(os.environ['OORA_USER'], os.environ['OORA_PASS'], filename))
 # }}}
 
