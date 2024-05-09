@@ -165,7 +165,7 @@ oora -C /tmp/data.csv -c "aaa(city,year,mass,when)" -D "%Y-%m-%d %H:%M:%S"
         parser.add_argument('-D' , help='csv datefmt (see -z)'                   , required=False)
         parser.add_argument('-c' , help='query'                                  , required=False)
         parser.add_argument('-C' , help='csv import  (see -z)'                   , required=False)
-        parser.add_argument('-A' , help='describe constraint'                    , required=False)
+        parser.add_argument('-A' , help='describe constraint / trigger'          , required=False)
         parser.add_argument('-z' , help='examples'                               , required=False  , action='store_true')
         args = parser.parse_args()
 
@@ -183,6 +183,7 @@ oora -C /tmp/data.csv -c "aaa(city,year,mass,when)" -D "%Y-%m-%d %H:%M:%S"
         if args.A:
             self.aligned=True
             self.query("select TABLE_NAME,COLUMN_NAME from user_cons_columns where lower(constraint_name) = lower('{}')".format(args.A))
+            self.query("select TRIGGER_BODY           from all_triggers where lower(trigger_name) = lower('{}')".format(args.A))
         if args.t:
             self.aligned=True
             self.query("SELECT COLUMN_NAME,NULLABLE,DATA_TYPE,DATA_LENGTH,DATA_DEFAULT from ALL_TAB_COLUMNS where lower(TABLE_NAME) = lower('{}') order by NULLABLE,COLUMN_NAME ".format(args.t))
