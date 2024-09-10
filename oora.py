@@ -21,7 +21,7 @@ class Oora:
         self.argparse()
 # }}}
     def query(self,query):# {{{
-        if re.match("^\s*select", query, re.IGNORECASE):
+        if re.match(r"^\s*select", query, re.IGNORECASE):
             if self.result_as_json==True:
                 self.as_json(query)
             elif self.aligned==True:
