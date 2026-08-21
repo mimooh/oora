@@ -15,7 +15,7 @@ cx_Oracle.init_oracle_client() # thick mode for old orace
 class Oora:
     def __init__(self):# {{{
         #self.con=cx_Oracle.connect(os.environ['OORA_USER']      , os.environ['OORA_PASS']          , os.environ['OORA_HOST'])
-        self.con=cx_Oracle.connect(user=os.environ['OORA_USER'] , password=os.environ['OORA_PASS'] , dsn=os.environ['OORA_HOST']+":1521/XE")
+        self.con=cx_Oracle.connect(user=os.environ['OORA_USER'] , password=os.environ['OORA_PASS'] , dsn=os.environ['OORA_HOST']+"/USOS")
         self.cur=self.con.cursor()
         self.delimiter=';'
         self.aligned=False
