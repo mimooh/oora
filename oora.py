@@ -9,16 +9,8 @@ from prettytable import PrettyTable
 from datetime import datetime
 from subprocess import Popen, PIPE
 
-<<<<<<< Updated upstream
-# cx_Oracle.init_oracle_client() # thick mode for old orace
-
 class Oora:
     def __init__(self):# {{{
-        #self.con=cx_Oracle.connect(os.environ['OORA_USER']      , os.environ['OORA_PASS']          , os.environ['OORA_HOST'])
-=======
-class Oora:
-    def __init__(self):# {{{
->>>>>>> Stashed changes
         self.con=cx_Oracle.connect(user=os.environ['OORA_USER'] , password=os.environ['OORA_PASS'] , dsn=os.environ['OORA_HOST']+"/"+os.environ['OORA_SCHEMA'])
         self.cur=self.con.cursor()
         self.delimiter=';'
