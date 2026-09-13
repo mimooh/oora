@@ -5,76 +5,64 @@ import sys
 import os
 import re
 import csv
-import json
 from prettytable import PrettyTable
 from datetime import datetime
 from subprocess import Popen, PIPE
 
+<<<<<<< Updated upstream
 # cx_Oracle.init_oracle_client() # thick mode for old orace
 
 class Oora:
     def __init__(self):# {{{
         #self.con=cx_Oracle.connect(os.environ['OORA_USER']      , os.environ['OORA_PASS']          , os.environ['OORA_HOST'])
+=======
+class Oora:
+    def __init__(self):# {{{
+>>>>>>> Stashed changes
         self.con=cx_Oracle.connect(user=os.environ['OORA_USER'] , password=os.environ['OORA_PASS'] , dsn=os.environ['OORA_HOST']+"/"+os.environ['OORA_SCHEMA'])
         self.cur=self.con.cursor()
         self.delimiter=';'
-        self.aligned=False
-        self.result_as_json=False
         self.csv_datefmt='%Y-%m-%d'
         self.argparse()
 # }}}
     def query(self,query):# {{{
         if re.match(r"^\s*select", query, re.IGNORECASE):
-            if self.result_as_json==True:
-                self.as_json(query)
-            elif self.aligned==True:
-                self.aligned_select_query(query)
-            else:
-                self.nonaligned_select_query(query)
+            self.select_query(query)
         else:
             self.cur.execute(query)
             self.con.commit()
 # }}}
-    def aligned_select_query(self,query):# {{{
-        ''' Slow for large data sets '''
+    def select_query(self, query, params=()):  # {{{
+        self.cur.execute(query, params)
+        data = self.cur.fetchall()
 
-        data=[]
-        for row in self.cur.execute(query):
-            if hasattr(self, 'select_first_5') and len(data)==5:
-                break
-            row = [ '0' if i==0 else i for i in row  ]
-            data.append([ "; "+str(i or '') for i in row ])
-        header=[ "; "+str(i[0]).lower() for i in self.cur.description ]
+        if not self.cur.description:
+            return
 
-        x = PrettyTable()
-        x.field_names = header
-        x.align='l'
-        x.border=False
-        for i in data:
-            x.add_row(i)
-        print(x)
-# }}}
-    def nonaligned_select_query(self,query):# {{{
-        data=[]
-        for row in self.cur.execute(query):
-            row = [ '0' if i==0 else i for i in row  ]
-            data.append(self.delimiter.join([ str(i or '') for i in row ]))
-        header=self.delimiter.join([ str(i[0]).lower() for i in self.cur.description ])
-        print(header)
-        print("\n".join(data))
-# }}}
-    def as_json(self,query):# {{{
-        rows=[]
-        for row in self.cur.execute(query):
-            rows.append(row)
-        header=[ str(i[0]).lower() for i in self.cur.description ]
+        if getattr(self, "select_first_5", 0) == 1:
+            data = data[:5]
 
-        out=[]
-        for i in rows:
-            out.append(dict(zip(header,i)))
-        print(json.dumps(out, sort_keys=True, default=str))
+        raw_headers = [str(col[0]).lower() for col in self.cur.description]
+        formatted_rows = [ [str(val) if val is not None else "" for val in row] for row in data ]
+
+        if len(data) <= 100:
+            header = [ f"; {col}" if idx > 0 else col for idx, col in enumerate(raw_headers) ]
+            x = PrettyTable()
+            x.field_names = header
+            x.align = 'l'
+            x.border = False
+            
+            for row in formatted_rows:
+                formatted_row = [ f"; {val}" if idx > 0 else val for idx, val in enumerate(row) ]
+                x.add_row(formatted_row)
+            print(x)
+        else:
+            header = self.delimiter.join(raw_headers)
+            formatted_data = [ self.delimiter.join(row) for row in formatted_rows ]
+            print(header)
+            print("\n".join(formatted_data))
 # }}}
-    def csv_values(self,query):# {{{
+    def csv_values(self,query): # {{{
         '''
         Replace             aaa(city,year,mass,when)
         with    insert into aaa(city,year,mass,when) values(:1, :2, :3, :4)
@@ -162,9 +150,7 @@ oora -C /tmp/data.csv -c "aaa(city,year,mass,when)" -D "%Y-%m-%d %H:%M:%S"
         parser.add_argument('-l' , help='list tables'                            , required=False  , action='store_true')
         parser.add_argument('-f' , help='run a script in sqlplus'                , required=False)
         parser.add_argument('-t' , help='describe table'                         , required=False)
-        parser.add_argument('-L' , help='select: first 5 results + align output' , required=False  , action='store_true')
-        parser.add_argument('-a' , help='aligned output'                         , required=False  , action='store_true')
-        parser.add_argument('-j' , help='as_json output'                         , required=False  , action='store_true')
+        parser.add_argument('-L' , help='select: first 5 results'                , required=False  , action='store_true')
         parser.add_argument('-D' , help='csv datefmt (see -z)'                   , required=False)
         parser.add_argument('-c' , help='query'                                  , required=False)
         parser.add_argument('-C' , help='csv import  (see -z)'                   , required=False)
@@ -172,8 +158,6 @@ oora -C /tmp/data.csv -c "aaa(city,year,mass,when)" -D "%Y-%m-%d %H:%M:%S"
         parser.add_argument('-z' , help='examples'                               , required=False  , action='store_true')
         args = parser.parse_args()
 
-        if args.a:
-            self.aligned=True
         if args.d:
             self.delimiter=args.d
         if args.D:
@@ -184,19 +168,14 @@ oora -C /tmp/data.csv -c "aaa(city,year,mass,when)" -D "%Y-%m-%d %H:%M:%S"
         if args.f:
             self.run_sql_script(args.f)
         if args.A:
-            self.aligned=True
             self.query("select TABLE_NAME,COLUMN_NAME from user_cons_columns where lower(constraint_name) = lower('{}')".format(args.A))
             self.query("select TRIGGER_BODY           from all_triggers where lower(trigger_name) = lower('{}')".format(args.A))
         if args.t:
-            self.aligned=True
             self.query("SELECT COLUMN_NAME,NULLABLE,DATA_TYPE,DATA_LENGTH,DATA_DEFAULT from ALL_TAB_COLUMNS where lower(TABLE_NAME) = lower('{}') order by NULLABLE,COLUMN_NAME ".format(args.t))
         if args.C:
             self.csv_import(args.C, args.c)
-        if args.j:
-            self.result_as_json=1
         if args.L:
             self.select_first_5=1
-            self.aligned=True
         if args.c:
             self.query(args.c)
         if args.z:
